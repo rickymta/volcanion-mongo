@@ -1,0 +1,41 @@
+services:
+  database:
+    image: mongo:${MONGO_VERSION}
+    container_name: mongo-db
+    ports:
+      - 27017:27017
+    environment:
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    volumes:
+      # seeding scripts
+      - ./mongodb/mongo-entrypoint:/docker-entrypoint-initdb.d
+      # named volumes
+      - mongodb:/data/db
+      - mongoconfig:/data/configdb
+    networks:
+      - extension-mongodb
+
+  extension-mongo-client:
+    # build will get tagged with 'image'
+    build: ./mongodb/mongo-client
+    image: mongo-client:3.9
+    container_name: ex-mongo-client
+    environment:
+      - MONGO_SERVER=auth-mongo-db
+      - MONGO_INITDB_DATABASE=${MONGO_INITDB_DATABASE}
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD}
+    networks:
+      - extension-mongodb
+    depends_on:
+      - mongo-db
+
+networks:
+  extension-mongodb:
+    driver: bridge
+
+volumes:
+  mongodb:
+  mongoconfig:

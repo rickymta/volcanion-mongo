@@ -347,3 +347,4 @@ healthchecksdb
 # Remove .github folder
 .github/
 .sonarqube/
+.env
